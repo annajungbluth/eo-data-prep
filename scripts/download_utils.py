@@ -5,16 +5,6 @@ from loguru import logger
 import warnings
 warnings.simplefilter("ignore")
 
-import fsspec
-fs = fsspec.filesystem('s3', anon=True)
-fsspec_caching = {
-    "cache_type": "blockcache",  # block cache stores blocks of fixed size and uses eviction using a LRU strategy.
-    "block_size": 8
-    * 1024
-    * 1024,  # size in bytes per block, adjust depends on the file size but the recommended size is in the MB
-}
-
-
 def random_date(start, end):
     """
     Generate a random datetime between two datetime objects.
@@ -109,7 +99,7 @@ class CenterWeightedCropDatasetEditor():
                                 'y': slice(ds['y'][ymin], ds['y'][ymax - 1])})
             # check data quality flags
             if check_quality_flags(patch_ds) == False:
-                logger.info('Found patch with bad quality flags, trying again ...')
+                # logger.info('Found patch with bad quality flags, trying again ...')
                 # try new set of indices
                 attempts += 1
                 continue   
@@ -117,5 +107,5 @@ class CenterWeightedCropDatasetEditor():
                 # exit loop and return patch
                 return patch_ds, xmin, ymin
 
-        logger.info('Could not find patch without bad quality flags after %d cropping attempts' % self.max_attempts)
+        # logger.info('Could not find patch without bad quality flags after %d cropping attempts' % self.max_attempts)
         return None

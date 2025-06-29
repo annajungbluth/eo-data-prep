@@ -7,7 +7,7 @@ from loguru import logger
 from tqdm import tqdm
 from datetime import datetime, timedelta
 from download_utils import random_datetime, CenterWeightedCropDatasetEditor
-from multiprocessing import Pool, cpu_count
+from multiprocessing import Pool, cpu_count, set_start_method
 import os
 import contextlib
 import warnings
@@ -19,13 +19,6 @@ def suppress_warnings():
         yield
 
 import fsspec
-fs = fsspec.filesystem('s3', anon=True)
-fsspec_caching = {
-    "cache_type": "blockcache",  # block cache stores blocks of fixed size and uses eviction using a LRU strategy.
-    "block_size": 8
-    * 1024
-    * 1024,  # size in bytes per block, adjust depends on the file size but the recommended size is in the MB
-}
 
 def download_mcmip(args_tuple):
     """
@@ -35,6 +28,15 @@ def download_mcmip(args_tuple):
     
     # Set unique random seed for this process
     np.random.seed(seed_offset)
+    
+    # Create filesystem object inside worker process to avoid fork-safety issues
+    fs = fsspec.filesystem('s3', anon=True)
+    fsspec_caching = {
+    "cache_type": "blockcache",  # block cache stores blocks of fixed size and uses eviction using a LRU strategy.
+    "block_size": 8
+    * 1024
+    * 1024,  # size in bytes per block, adjust depends on the file size but the recommended size is in the MB
+    }
 
     try:
         # Generate random datetime within the specified range
@@ -91,6 +93,9 @@ def download_mcmip(args_tuple):
         return None
 
 if __name__ == "__main__":
+    # Set multiprocessing start method to spawn to avoid fork-safety issues
+    set_start_method('spawn', force=True)
+    
     parser = argparse.ArgumentParser()
     parser.add_argument("--seed", type=int, required=True, help="Random seed for reproducibility")
     parser.add_argument("--num_files", type=int, default=1, help="Number of files to download")
@@ -107,7 +112,9 @@ if __name__ == "__main__":
     np.random.seed(args.seed)
 
     # Create output directory if it doesn't exist
-    os.makedirs(args.output_dir, exist_ok=True)
+    now = datetime.now().strftime("%Y%m%d%H%M%S")
+    output_dir = f"{args.output_dir}/mcmip-{now}"
+    os.makedirs(output_dir, exist_ok=True)
 
     # Convert start and end dates to datetime objects
     start = datetime.strptime(args.start, "%Y-%m-%d")
@@ -122,7 +129,7 @@ if __name__ == "__main__":
     
     # Prepare arguments for multiprocessing
     process_args = [
-        (start, end, args.output_dir, args.patch_size, args.fov_radius, seed)
+        (start, end, output_dir, args.patch_size, args.fov_radius, seed)
         for seed in seeds
     ]
 
