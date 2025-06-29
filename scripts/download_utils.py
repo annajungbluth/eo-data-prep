@@ -31,7 +31,7 @@ def random_datetime(start, end):
     return datetime(random_date_value.year, random_date_value.month, random_date_value.day,
                     random_time_value.hour, random_time_value.minute, random_time_value.second)
 
-def create_fov_mask(shape, fov_radius):
+def create_fov_mask(shape, fov_radius, patch_shape=None):
     """
     Function to create mask for specified field of view.
     """
@@ -46,6 +46,20 @@ def create_fov_mask(shape, fov_radius):
     normalized_dist = dist_from_center / max_dist
     # Create mask for specified field of view
     mask = normalized_dist <= fov_radius
+
+    # If specified, ensure the mask also covers the patch size
+    if patch_shape is not None:
+        patch_shape_half_x = patch_shape[0] // 2 + 1
+        patch_shape_half_y = patch_shape[1] // 2 + 1
+        # Create a square mask for the patch size
+        patch_mask = np.ones(shape, dtype=bool)
+        # Mask out the corner area to keep everything beyond patch_size_half
+        patch_mask[:patch_shape_half_x, :] = False
+        patch_mask[-patch_shape_half_x:, :] = False
+        patch_mask[:, :patch_shape_half_y] = False
+        patch_mask[:, -patch_shape_half_y:] = False
+        # Combine the two masks
+        mask = mask & patch_mask
     return mask
 
 def check_quality_flags(ds):
@@ -77,7 +91,11 @@ class CenterWeightedCropDatasetEditor():
 
         # create mask for valid coordinates within desired field of view
         # NOTE: This masks from the center to the image edge, rather than disk edge
-        valid_mask = create_fov_mask(shape=(ds.x.shape[0], ds.y.shape[0]), fov_radius=self.fov_radius)
+        valid_mask = create_fov_mask(
+            shape=(ds.x.shape[0], ds.y.shape[0]), 
+            fov_radius=self.fov_radius,
+            patch_shape=self.patch_shape
+            )
 
         # get coordinate pairs for valid points
         coords_on_disk = np.column_stack((x_grid[valid_mask], y_grid[valid_mask]))

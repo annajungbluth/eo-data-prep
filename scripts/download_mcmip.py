@@ -56,7 +56,7 @@ def download_mcmip(args_tuple):
         
         # Check that we have MCMIP files for the selected date
         if len(abi_files) == 0:
-            logger.warning(f"No MCMIP files found for the date {dt}.")
+            logger.warning(f"Process {os.getpid()}: No MCMIP files found for date {dt}.")
             return None
         
         # Load the first file into an xarray dataset
@@ -75,9 +75,10 @@ def download_mcmip(args_tuple):
         patch_ds, xmin, ymin = result
 
         # Save patch to netcdf file
-        patch_filename = f"{meas_time_str}_mcmip_patch.nc"
+        patch_filename = f"{meas_time_str}_patch_{xmin}_{ymin}.nc"
         patch_ds.to_netcdf(f"{output_dir}/{patch_filename}")
-        logger.info(f"Process {os.getpid()}: Saved patch to {output_dir}/{patch_filename} ...")
+        del patch_ds  # Free memory
+        # logger.info(f"Process {os.getpid()}: Saved patch to {output_dir}/{patch_filename} ...")
 
         # Return results as dictionary
         return {
@@ -112,8 +113,7 @@ if __name__ == "__main__":
     np.random.seed(args.seed)
 
     # Create output directory if it doesn't exist
-    now = datetime.now().strftime("%Y%m%d%H%M%S")
-    output_dir = f"{args.output_dir}/mcmip-{now}"
+    output_dir = f"{args.output_dir}/mcmip-{args.seed}"
     os.makedirs(output_dir, exist_ok=True)
 
     # Convert start and end dates to datetime objects
