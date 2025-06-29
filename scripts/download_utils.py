@@ -73,7 +73,7 @@ def check_quality_flags(ds):
     """
     # Check each channel individually - exit early if bad quality found
     for i in range(1, 17):
-        if (ds[f'DQF_C{i:02d}'] > 1).any().item():
+        if (ds[f'DQF_C{i:02d}'] > 0).any().item():
             return False
     return True
 
