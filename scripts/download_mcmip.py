@@ -68,7 +68,7 @@ def download_mcmip(args_tuple):
         crop = CenterWeightedCropDatasetEditor(patch_shape=(patch_size, patch_size), fov_radius=fov_radius)
         result = crop(ds)
         
-        if result is None:
+        if result is None: # i.e. if no valid patch was found
             logger.warning(f"Process {os.getpid()}: Could not find valid patch for {dt}")
             return None
             
