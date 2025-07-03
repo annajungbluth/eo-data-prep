@@ -1,0 +1,12 @@
+#!/bin/bash
+#SBATCH --account=eo_shared_data 
+#SBATCH --partition=standard 
+#SBATCH --qos=short
+#SBATCH --time=00:15:00
+#SBATCH --mem=8000
+#SBATCH --job-name=process_cloudsat
+#SBATCH -o ./logs/slurm-%A_%a.o
+#SBATCH --array=0-9999
+
+OFFSET=60000
+./process_cloudsat.py $(( ${SLURM_ARRAY_TASK_ID} + $OFFSET ))
