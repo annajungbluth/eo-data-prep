@@ -189,9 +189,9 @@ def main() -> None:
     
     from google.cloud import storage
     import os
-    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "/home/users/wkjones/esl-3d-clouds-extremes-44b485ee670f.json"
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "" # TODO: Add credentials
     storage_client = storage.Client()
-    bucket = storage_client.get_bucket("2025-esl-3dclouds-extremes-datasets")
+    bucket = storage_client.get_bucket("") # TODO: ADD project
     blob = bucket.blob(f'cloudsat/merged/{save_name}')
     blob.upload_from_filename(save_path/save_name)
 
