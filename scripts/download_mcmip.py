@@ -6,7 +6,7 @@ import argparse
 from loguru import logger
 from tqdm import tqdm
 from datetime import datetime, timedelta
-from download_utils import random_datetime, CenterWeightedCropDatasetEditor
+from process_utils import random_datetime, CenterWeightedCropDatasetEditor
 from multiprocessing import Pool, cpu_count, set_start_method
 import os
 import contextlib
@@ -65,11 +65,14 @@ def download_mcmip(args_tuple):
         # logger.info(f"Process {os.getpid()}: Loaded MCMIP file: {abi_files['file'][0]} ...")
         
         # Crop dataset into patch
-        crop = CenterWeightedCropDatasetEditor(patch_shape=(patch_size, patch_size), fov_radius=fov_radius)
+        crop = CenterWeightedCropDatasetEditor(
+            patch_shape=(patch_size, patch_size), 
+            fov_radius=fov_radius,
+            satellite = 'goes')
         result = crop(ds)
         
         if result is None: # i.e. if no valid patch was found
-            logger.warning(f"Process {os.getpid()}: Could not find valid patch for {dt}")
+            logger.warning(f"Could not find valid patch for {dt}")
             return None
             
         patch_ds, xmin, ymin = result
@@ -151,7 +154,7 @@ if __name__ == "__main__":
         results_df = pd.DataFrame(successful_results)
         
         # Save results to CSV
-        csv_filename = f"{args.output_dir}/mcmip_index.csv"
+        csv_filename = f"{output_dir}/mcmip_index.csv"
         results_df.to_csv(csv_filename, index=False)
 
         # Print summary
