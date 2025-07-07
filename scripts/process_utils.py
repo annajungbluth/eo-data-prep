@@ -81,16 +81,15 @@ def check_quality_flags_goes(ds):
             return False
     return True
 
-def check_quality_flags_msg(ds, cutoff=10000):
+def check_quality_flags_msg(ds, min_valid_fraction=0.99):
     """
     Function to check quality in MSG data.
 
     Args:
         ds (xarray.Dataset): The dataset to check.
-        cutoff (int): The maximum number of NaN values allowed. If exceeded, the function will return False. 
-            There will be NaN values close to the disk edge, even after filtering for valid lat/lon values.
-            From experimentation, these cases might have around 8000 to 10000 NaN values close to the disk edge
-            even if the data on disk is valid. To not filter out all edge disk images, we emperically set the default cutoff to 10000.
+        min_valid_fraction (float): Minimum fraction of valid data required for the dataset to pass the quality check.
+            From experimentation, patches around the limb might have around 8000 to 10000 NaN values close to the disk edge
+            even if the data on disk is valid. To not filter out all edge disk images, we emperically set the default to allow 1% of the data to be NaN.
     Returns:
         bool: True if the dataset passes the quality check, False otherwise.
     """
@@ -115,7 +114,9 @@ def check_quality_flags_msg(ds, cutoff=10000):
     for channel in channels:
         # Check for NaN only where mask is True, i.e. where the lat/lon values are valid
         nan_in_valid_region = np.isnan(ds[channel].values[mask])
-        if np.count_nonzero(nan_in_valid_region) > cutoff:
+
+        # If the fraction of NaN values in the valid region exceeds the threshold, return False
+        if np.count_nonzero(nan_in_valid_region)/(ds.x.size * ds.y.size) > min_valid_fraction:
             return False
         else: 
             return True

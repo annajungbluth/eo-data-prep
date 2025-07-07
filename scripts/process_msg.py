@@ -1,3 +1,4 @@
+#!/home/users/annaju/miniforge3/envs/jasmin-env/bin/python
 import pathlib
 from datetime import datetime
 import numpy as np
@@ -8,6 +9,8 @@ from loguru import logger
 import pandas as pd
 import tempfile
 import zipfile
+from google.cloud import storage
+import os
 from process_utils import CenterWeightedCropDatasetEditor, read_zipped_msg
 
 CHANNELS = [
@@ -92,15 +95,13 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    logger.info(f"Processing file number {args.number}...")
-
-    # save_path = pathlib.Path("/work/scratch-nopw2/annaju/msg-tmp/")
-    save_path = pathlib.Path(".")
+    save_path = pathlib.Path("/work/scratch-nopw2/annaju/msg_temp/")
     save_path.mkdir(parents=True, exist_ok=True)
 
     df_selected_files = pd.read_csv("msg-sample-50000.csv")
     # Extract relevant file and datetime based on provided number
     selected_file = df_selected_files.iloc[args.number]["path"]
+    logger.info(f"Processing file: {selected_file}..")
 
     result = load_and_patch_msg(selected_file, 
                                   patch_size=args.patch_size, 
@@ -113,13 +114,29 @@ if __name__ == "__main__":
 
         # Reduce file size
         patch_ds, encoding = reduce_file_size(patch_ds)
+
+        logger.info(f"Saving patch for {dt_str} at coordinates ({xmin}, {ymin})...")
  
         # Save patch to netcdf file
         patch_filename = f"{dt_str}_patch_{xmin}_{ymin}.nc"
         patch_ds.to_netcdf(f"{save_path}/{patch_filename}", encoding=encoding)
         # TODO: Reduce the file size, at the moment, each file is 24 MB
 
-    # TODO: Add upload to GCP
+        logger.info(f"Uploading file to GCP...")
+
+        os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "/home/users/annaju/esl-3d-clouds-extremes-baa3a73d57dc.json"  # TODO: Add credentials
+        storage_client = storage.Client()
+        bucket = storage_client.get_bucket("2025-esl-3dclouds-extremes-datasets")
+        blob = bucket.blob(f'pre-training/msg/test/{patch_filename}')
+        blob.upload_from_filename(f"{save_path}/{patch_filename}")
+
+        # remove local file
+        (save_path / patch_filename).unlink()
+
+        logger.info("Finished successfully ...")
+
+    else:
+        logger.warning(f"No valid patch found for number {args.number} and {selected_file}. Skipping upload ...")
 
 
 
