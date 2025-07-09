@@ -152,8 +152,7 @@ if __name__ == "__main__":
     np.random.seed(args.seed)
 
     # Create output directory if it doesn't exist
-    output_dir = f"{args.output_dir}/himawari-{args.seed}"
-    os.makedirs(output_dir, exist_ok=True)
+    os.makedirs(args.output_dir, exist_ok=True)
 
     # Convert start and end dates to datetime objects
     start = datetime.strptime(args.start, "%Y-%m-%d")
@@ -168,7 +167,7 @@ if __name__ == "__main__":
     
     # Prepare arguments for multiprocessing
     process_args = [
-        (start, end, output_dir, args.patch_size, args.fov_radius, seed)
+        (start, end, args.output_dir, args.patch_size, args.fov_radius, seed)
         for seed in seeds
     ]
 
@@ -187,18 +186,18 @@ if __name__ == "__main__":
     
     # Create DataFrame with results
     if successful_results:
-        results_df = pd.DataFrame(successful_results)
+        # results_df = pd.DataFrame(successful_results)
         
-        # Save results to CSV
-        csv_filename = f"{output_dir}/himawari_index.csv"
-        results_df.to_csv(csv_filename, index=False)
+        # # Save results to CSV
+        # csv_filename = f"{output_dir}/himawari_index.csv"
+        # results_df.to_csv(csv_filename, index=False)
 
         # Print summary
         print(f"\nDownload Summary:")
         print(f"Total files requested: {args.num_files}")
         print(f"Successfully downloaded: {len(successful_results)}")
         print(f"Failed downloads: {args.num_files - len(successful_results)}")
-        print(f"Results saved to: {csv_filename}")
+        # print(f"Results saved to: {csv_filename}")
         
     else:
         logger.error("No files were successfully downloaded!")
