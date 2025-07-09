@@ -110,16 +110,19 @@ def check_quality_flags_msg(ds, min_valid_fraction=0.999):
     mask_lon = ~np.isinf(ds.longitude)
     # combine both masks to find all points with valid lat/lon values
     mask = mask_lat & mask_lon
+    valid_pixels = np.count_nonzero(mask)
+    
     # loop through each channel to check for NaN values
     for channel in channels:
         # Check for NaN only where mask is True, i.e. where the lat/lon values are valid
         nan_in_valid_region = np.isnan(ds[channel].values[mask])
+        nan_fraction = np.count_nonzero(nan_in_valid_region) / valid_pixels
 
-        # If the fraction of NaN values in the valid region exceeds the threshold, return False
-        if np.count_nonzero(nan_in_valid_region)/(ds.x.size * ds.y.size) > (1-min_valid_fraction):
+        # If the fraction of NaN values exceeds the allowed threshold, return False
+        if nan_fraction > (1 - min_valid_fraction):
             return False
-        else: 
-            return True
+    # If we get here, all channels passed the quality check
+    return True
 
 def check_quality_flags_himawari(ds, min_valid_fraction=0.999):
     """
@@ -155,16 +158,19 @@ def check_quality_flags_himawari(ds, min_valid_fraction=0.999):
     mask_lon = ~np.isinf(ds.longitude)
     # combine both masks to find all points with valid lat/lon values
     mask = mask_lat & mask_lon
+    valid_pixels = np.count_nonzero(mask)
+    
     # loop through each channel to check for NaN values
     for channel in channels:
         # Check for NaN only where mask is True, i.e. where the lat/lon values are valid
         nan_in_valid_region = np.isnan(ds[channel].values[mask])
+        nan_fraction = np.count_nonzero(nan_in_valid_region) / valid_pixels
 
-        # If the fraction of NaN values in the valid region exceeds the threshold, return False
-        if np.count_nonzero(nan_in_valid_region)/(ds.x.size * ds.y.size) > (1-min_valid_fraction):
+        # If the fraction of NaN values exceeds the allowed threshold, return False
+        if nan_fraction > (1 - min_valid_fraction):
             return False
-        else: 
-            return True
+    # If we get here, all channels passed the quality check
+    return True
 
 class CenterWeightedCropDatasetEditor():
     def __init__(self, patch_shape, satellite, fov_radius=0.6, max_attempts=10):
