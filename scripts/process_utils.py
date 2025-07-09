@@ -81,7 +81,7 @@ def check_quality_flags_goes(ds):
             return False
     return True
 
-def check_quality_flags_msg(ds, min_valid_fraction=0.99):
+def check_quality_flags_msg(ds, min_valid_fraction=0.999):
     """
     Function to check quality in MSG data.
 
@@ -89,7 +89,7 @@ def check_quality_flags_msg(ds, min_valid_fraction=0.99):
         ds (xarray.Dataset): The dataset to check.
         min_valid_fraction (float): Minimum fraction of valid data required for the dataset to pass the quality check.
             From experimentation, patches around the limb might have around 8000 to 10000 NaN values close to the disk edge
-            even if the data on disk is valid. To not filter out all edge disk images, we emperically set the default to allow 1% of the data to be NaN.
+            even if the data on disk is valid. To not filter out all edge disk images, we emperically set the default to allow 0.1% of the data to be NaN.
     Returns:
         bool: True if the dataset passes the quality check, False otherwise.
     """
@@ -116,12 +116,12 @@ def check_quality_flags_msg(ds, min_valid_fraction=0.99):
         nan_in_valid_region = np.isnan(ds[channel].values[mask])
 
         # If the fraction of NaN values in the valid region exceeds the threshold, return False
-        if np.count_nonzero(nan_in_valid_region)/(ds.x.size * ds.y.size) > min_valid_fraction:
+        if np.count_nonzero(nan_in_valid_region)/(ds.x.size * ds.y.size) > (1-min_valid_fraction):
             return False
         else: 
             return True
 
-def check_quality_flags_himawari(ds, min_valid_fraction=0.99):
+def check_quality_flags_himawari(ds, min_valid_fraction=0.999):
     """
     Function to check quality in HIMAWARI data.
 
@@ -129,7 +129,7 @@ def check_quality_flags_himawari(ds, min_valid_fraction=0.99):
         ds (xarray.Dataset): The dataset to check.
         min_valid_fraction (float): Minimum fraction of valid data required for the dataset to pass the quality check.
             From experimentation, patches around the limb might have around 8000 to 10000 NaN values close to the disk edge
-            even if the data on disk is valid. To not filter out all edge disk images, we emperically set the default to allow 1% of the data to be NaN.
+            even if the data on disk is valid. To not filter out all edge disk images, we emperically set the default to allow 0.1% of the data to be NaN.
     Returns:
         bool: True if the dataset passes the quality check, False otherwise.
     """
@@ -161,7 +161,7 @@ def check_quality_flags_himawari(ds, min_valid_fraction=0.99):
         nan_in_valid_region = np.isnan(ds[channel].values[mask])
 
         # If the fraction of NaN values in the valid region exceeds the threshold, return False
-        if np.count_nonzero(nan_in_valid_region)/(ds.x.size * ds.y.size) > min_valid_fraction:
+        if np.count_nonzero(nan_in_valid_region)/(ds.x.size * ds.y.size) > (1-min_valid_fraction):
             return False
         else: 
             return True
