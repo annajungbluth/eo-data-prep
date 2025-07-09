@@ -5,9 +5,8 @@
 #SBATCH --time=00:15:00
 #SBATCH --mem=8000
 #SBATCH --job-name=process_msg
-#SBATCH -o ./logs/slurm-%A_%a.o
-#SBATCH --array=0-10
+#SBATCH -o /home/users/annaju/logs/slurm-%A_%a.o
+#SBATCH --array=0-10000
 
-./process_msg.py $(( ${SLURM_ARRAY_TASK_ID}))
-
-
+OFFSET=0
+./process_msg.py $(( ${SLURM_ARRAY_TASK_ID} + $OFFSET ))
