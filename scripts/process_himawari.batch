@@ -4,9 +4,9 @@
 #SBATCH --qos=short
 #SBATCH --time=00:15:00
 #SBATCH --mem=8000
-#SBATCH --job-name=process_msg
+#SBATCH --job-name=process_himawari
 #SBATCH -o /home/users/annaju/logs/slurm-%A_%a.o
-#SBATCH --array=0-9999
+#SBATCH --array=0-9
 
-OFFSET=30000
-./process_msg.py $(( ${SLURM_ARRAY_TASK_ID} + $OFFSET ))
+OFFSET=0
+./process_himawari.py $(( ${SLURM_ARRAY_TASK_ID} + $OFFSET ))
