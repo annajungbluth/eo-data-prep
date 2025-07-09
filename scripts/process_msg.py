@@ -127,7 +127,7 @@ if __name__ == "__main__":
         os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "/home/users/annaju/esl-3d-clouds-extremes-baa3a73d57dc.json"  # TODO: Add credentials
         storage_client = storage.Client()
         bucket = storage_client.get_bucket("2025-esl-3dclouds-extremes-datasets")
-        blob = bucket.blob(f'pre-training/msg/test/{patch_filename}')
+        blob = bucket.blob(f'pre-training/msg/l1b/{patch_filename}')
         blob.upload_from_filename(f"{save_path}/{patch_filename}")
 
         # remove local file
