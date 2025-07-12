@@ -1,0 +1,18 @@
+#!/bin/bash
+#SBATCH --account=eo_shared_data 
+#SBATCH --partition=standard 
+#SBATCH --qos=short
+#SBATCH --time=00:15:00
+#SBATCH --mem=8000
+#SBATCH --job-name=process_himawari
+#SBATCH -o /home/users/annaju/logs/slurm-%A_%a.o
+#SBATCH --array=0-110
+
+OFFSET=60000
+
+SEED=$(( ${SLURM_ARRAY_TASK_ID} + $OFFSET ))
+
+echo "Running process_himawari with seed $(( ${SLURM_ARRAY_TASK_ID} + $OFFSET ))"
+
+# set up run with seed argument
+./process_himawari.py --seed $SEED

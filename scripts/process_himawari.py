@@ -109,7 +109,7 @@ def download_himawari(dt, patch_size, fov_radius):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--seed", type=int, required=True, help="Random seed for reproducibility")
+    parser.add_argument("--seed", type=int, help="Random seed for reproducibility")
     parser.add_argument("--start", type=str, default="2015-07-07", help="Start date in YYYY-MM-DD format")
     parser.add_argument("--end", type=str, default="2022-12-12", help="End date in YYYY-MM-DD format")
     parser.add_argument("--patch_size", type=int, default=1024, help="Size of the patch to crop from the dataset")
@@ -119,6 +119,7 @@ if __name__ == "__main__":
 
     # Set random seed for reproducibility
     np.random.seed(args.seed)
+    logger.info(f"Using random seed: {args.seed}")
 
     # Create output directory if it doesn't exist
     save_path = pathlib.Path("/work/scratch-nopw2/annaju/himawari_temp/")

@@ -6,7 +6,13 @@
 #SBATCH --mem=8000
 #SBATCH --job-name=process_himawari
 #SBATCH -o /home/users/annaju/logs/slurm-%A_%a.o
-#SBATCH --array=0-9
+#SBATCH --array=0-9999
 
-OFFSET=0
-./process_himawari.py $(( ${SLURM_ARRAY_TASK_ID} + $OFFSET ))
+OFFSET=30000
+
+SEED=$(( ${SLURM_ARRAY_TASK_ID} + $OFFSET ))
+
+echo "Running process_himawari with seed $(( ${SLURM_ARRAY_TASK_ID} + $OFFSET ))"
+
+# set up run with seed argument
+./process_himawari.py --seed $SEED
