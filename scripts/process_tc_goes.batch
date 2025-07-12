@@ -1,0 +1,17 @@
+#!/bin/bash
+#SBATCH --account=eo_shared_data 
+#SBATCH --partition=standard 
+#SBATCH --qos=short
+#SBATCH --time=00:15:00
+#SBATCH --mem=8000
+#SBATCH --job-name=process_tc_goes
+#SBATCH -o /home/users/annaju/logs/slurm-%A_%a.o
+#SBATCH --array=0-9999
+
+OFFSET=0
+
+NUM=$(( ${SLURM_ARRAY_TASK_ID} + $OFFSET ))
+
+echo "Running process_tc_goes with seed $(( ${SLURM_ARRAY_TASK_ID} + $OFFSET ))"
+
+./process_tc_goes.py --num $NUM
