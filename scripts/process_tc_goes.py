@@ -103,7 +103,7 @@ if __name__ == "__main__":
     # save_path = pathlib.Path(f"./{SID}")
     save_path.mkdir(parents=True, exist_ok=True)
 
-    patch_filename = f'{SID}_{time_str}_patch.nc'
+    patch_filename = f'{time_str}_{SID}_patch.nc'
     save_file_name = save_path / patch_filename
 
     logger.info(f"Loading GOES image {file}...")

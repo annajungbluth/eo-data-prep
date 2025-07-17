@@ -6,9 +6,9 @@
 #SBATCH --mem=8000
 #SBATCH --job-name=process_himawari
 #SBATCH -o /home/users/annaju/logs/slurm-%A_%a.o
-#SBATCH --array=0-9999
+#SBATCH --array=0-3
 
-OFFSET=30000
+OFFSET=50000
 
 SEED=$(( ${SLURM_ARRAY_TASK_ID} + $OFFSET ))
 
